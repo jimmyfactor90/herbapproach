@@ -1,0 +1,48 @@
+// ===== TYPOGRAPHY =====
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+body {
+  font-family: $font-family-base;
+  color: $gray-800;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: $font-family-heading;
+  font-weight: 700;
+  color: $gray-900;
+}
+
+.text-gradient {
+  @include text-gradient;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.75rem;
+  }
+}
+
+.section-subtitle {
+  font-size: 1.125rem;
+  color: $gray-500;
+  max-width: 600px;
+}
+
+.price-text {
+  font-family: $font-family-heading;
+  font-weight: 700;
+  color: $primary;
+}
+
+.price-compare {
+  text-decoration: line-through;
+  color: $gray-400;
+  font-size: 0.875rem;
+}

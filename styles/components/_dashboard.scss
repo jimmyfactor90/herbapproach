@@ -1,0 +1,255 @@
+// ===== COMPONENT: ADMIN SIDEBAR & DASHBOARD =====
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  width: 280px;
+  background: $gray-900;
+  color: $gray-300;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1040;
+  transition: transform 0.3s ease;
+
+  @media (max-width: 991px) {
+    transform: translateX(-100%);
+    &.show { transform: translateX(0); }
+  }
+
+  .sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+    .sidebar-brand {
+      font-family: $font-family-heading;
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: $white;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+    overflow-y: auto;
+
+    .nav-section-title {
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: $gray-500;
+      padding: 0.75rem 1.5rem 0.5rem;
+      font-weight: 600;
+    }
+
+    .nav-item {
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        color: $gray-400;
+        text-decoration: none;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        transition: $transition-fast;
+        border-left: 3px solid transparent;
+
+        i {
+          font-size: 1.125rem;
+          width: 24px;
+          text-align: center;
+        }
+
+        &:hover {
+          color: $white;
+          background: rgba(255, 255, 255, 0.04);
+        }
+
+        &.active {
+          color: $white;
+          background: rgba($primary, 0.15);
+          border-left-color: $secondary;
+        }
+
+        .badge-nav {
+          margin-left: auto;
+          background: $danger;
+          color: $white;
+          font-size: 0.6875rem;
+          padding: 0.15rem 0.5rem;
+          border-radius: $border-radius-pill;
+        }
+      }
+    }
+  }
+
+  .sidebar-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+}
+
+.admin-content {
+  flex: 1;
+  margin-left: 280px;
+  min-height: 100vh;
+  background: $gray-100;
+
+  @media (max-width: 991px) {
+    margin-left: 0;
+  }
+}
+
+.admin-topbar {
+  background: $white;
+  padding: 1rem 1.5rem;
+  box-shadow: $box-shadow-sm;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.admin-page {
+  padding: 1.5rem;
+}
+
+// Stats cards
+.stat-card {
+  @include card-base;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: $border-radius-lg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+
+    &.bg-primary-soft {
+      background: rgba($primary, 0.1);
+      color: $primary;
+    }
+    &.bg-success-soft {
+      background: rgba($success, 0.1);
+      color: $success;
+    }
+    &.bg-warning-soft {
+      background: rgba($warning, 0.1);
+      color: $warning;
+    }
+    &.bg-info-soft {
+      background: rgba($info, 0.1);
+      color: $info;
+    }
+  }
+
+  .stat-info {
+    .stat-value {
+      font-family: $font-family-heading;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $gray-900;
+    }
+    .stat-label {
+      font-size: 0.8125rem;
+      color: $gray-500;
+    }
+    .stat-trend {
+      font-size: 0.75rem;
+      font-weight: 600;
+      &.up { color: $success; }
+      &.down { color: $danger; }
+    }
+  }
+}
+
+// Data Table
+.data-table {
+  @include card-base;
+
+  .table-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid $gray-200;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    h5 {
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+
+  .table {
+    margin: 0;
+
+    th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: $gray-500;
+      font-weight: 600;
+      border-bottom: 2px solid $gray-200;
+      padding: 1rem 1.5rem;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 1rem 1.5rem;
+      vertical-align: middle;
+      border-bottom: 1px solid $gray-100;
+      font-size: 0.9375rem;
+    }
+
+    tbody tr {
+      transition: $transition-fast;
+      &:hover {
+        background: rgba($primary, 0.02);
+      }
+    }
+  }
+}
+
+// Status Badges
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: $border-radius-pill;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-pending { background-color: rgba($warning, 0.15); color: $warning; }
+.status-processing { background-color: rgba($info, 0.15); color: $info; }
+.status-shipped { background-color: rgba($secondary, 0.15); color: $secondary; }
+.status-delivered { background-color: rgba($success, 0.15); color: $success; }
+.status-cancelled { background-color: rgba($danger, 0.15); color: $danger; }
+
+.form-select-sm.status-pending { background-color: rgba($warning, 0.1) !important; color: $warning !important; }
+.form-select-sm.status-processing { background-color: rgba($info, 0.1) !important; color: $info !important; }
+.form-select-sm.status-shipped { background-color: rgba($secondary, 0.1) !important; color: $secondary !important; }
+.form-select-sm.status-delivered { background-color: rgba($success, 0.1) !important; color: $success !important; }
+.form-select-sm.status-cancelled { background-color: rgba($danger, 0.1) !important; color: $danger !important; }

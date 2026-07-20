@@ -1,0 +1,78 @@
+// ===== COMPONENT: SIDEBAR (SHOP FILTERS) =====
+
+.shop-sidebar {
+  .filter-group {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid $gray-200;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .filter-title {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      color: $gray-800;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .toggle-icon {
+        cursor: pointer;
+        color: $gray-400;
+        transition: $transition-fast;
+      }
+    }
+
+    .filter-options {
+      .form-check {
+        padding-left: 1.75rem;
+        margin-bottom: 0.5rem;
+
+        .form-check-input {
+          border: 2px solid $gray-300;
+          &:checked {
+            background-color: $primary;
+            border-color: $primary;
+          }
+          &:focus {
+            box-shadow: 0 0 0 3px rgba($primary, 0.1);
+          }
+        }
+
+        .form-check-label {
+          font-size: 0.9375rem;
+          color: $gray-600;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          .count {
+            color: $gray-400;
+            font-size: 0.8125rem;
+          }
+        }
+      }
+    }
+  }
+
+  // Price range slider
+  .price-range {
+    .range-values {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: $primary;
+      margin-top: 0.5rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: $primary;
+    }
+  }
+}
