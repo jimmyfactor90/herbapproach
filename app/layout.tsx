@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.scss";
 import { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Herb Approach | Canada's #1 Online Dispensary",
@@ -17,6 +18,7 @@ export default function RootLayout({
       <body className="page-enter">
         <Toaster position="top-right" />
         {children}
+        <Analytics />
         {/* Bootstrap Bundle JS */}
         <script
           src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
