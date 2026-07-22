@@ -52,6 +52,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   return (
     <div className="bg-gray-50 min-vh-100 pb-5">
+      {/* Page Title */}
+      <div className="bg-white pt-4 pb-2">
+        <div className="container text-center">
+          <h1 className="fw-900 h2 m-0">{currentCategory ? currentCategory.name : "All Products"}</h1>
+        </div>
+      </div>
+
       {/* Breadcrumb */}
       <div className="bg-white border-bottom py-3">
         <div className="container">
@@ -68,7 +75,17 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       {/* Horizontal Filter Bar */}
       <HorizontalFilterBar categories={categories} activeFilters={params} totalProducts={pagination.total} />
 
-      <div className="container">
+      {/* Category Description */}
+      {currentCategory?.description && (
+        <div className="bg-white border-bottom py-5">
+          <div className="container text-center">
+            <h2 className="fw-bold h4 mb-3">{currentCategory.name}</h2>
+            <p className="text-muted mx-auto mb-0" style={{ maxWidth: '850px' }}>{currentCategory.description}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="container mt-4">
         {products.length > 0 ? (
           <>
             <div className="row g-3">
