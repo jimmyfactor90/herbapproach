@@ -16,6 +16,7 @@ const categorySchema = z.object({
   description: z.string().optional(),
   image: z.string().optional(),
   parentId: z.string().optional().nullable(),
+  featured: z.boolean().default(false),
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
@@ -43,6 +44,7 @@ export default function CategoryForm({ initialData, categories }: CategoryFormPr
       description: "",
       image: "",
       parentId: null,
+      featured: false,
     },
   });
 
@@ -152,16 +154,29 @@ export default function CategoryForm({ initialData, categories }: CategoryFormPr
         </div>
 
         <div className="col-lg-4">
-          <div className="card border-0 shadow-sm rounded-lg p-4">
+          <div className="card border-0 shadow-sm rounded-lg p-4 mb-4">
             <label className="form-label small fw-bold mb-3">Category Image</label>
             <div className="mb-3">
-              <ImageUpload 
-                value={watch("image") || ""} 
+              <ImageUpload
+                value={watch("image") || ""}
                 onChange={(url) => setValue("image", url, { shouldValidate: true })}
                 onRemove={() => setValue("image", "", { shouldValidate: true })}
               />
             </div>
             <p className="extra-small text-muted mt-2">Upload a high-quality square image (e.g., 500x500px) that represents this category.</p>
+          </div>
+
+          <div className="card border-0 shadow-sm rounded-lg p-4">
+            <div className="form-check form-switch m-0">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="featured"
+                {...register("featured")}
+              />
+              <label className="form-check-label fw-bold" htmlFor="featured">Featured on Homepage</label>
+            </div>
+            <p className="extra-small text-muted mt-2 mb-0">Toggle on to show this category in the homepage category grid.</p>
           </div>
         </div>
       </div>

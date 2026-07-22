@@ -78,6 +78,7 @@ model Category {
   slug        String     @unique
   description String?
   image       String?
+  featured    Boolean    @default(false)
   parentId    String?
   parent      Category?  @relation("SubCategories", fields: [parentId], references: [id])
   children    Category[] @relation("SubCategories")

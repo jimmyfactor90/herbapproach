@@ -11,6 +11,7 @@ interface CategoryNode {
   id: string;
   name: string;
   slug: string;
+  image: string | null;
   children: { id: string; name: string; slug: string }[];
 }
 
@@ -39,7 +40,6 @@ export default function Header({ categories }: HeaderProps) {
   const MEGA_MENUS: Record<string, {
     categories: string[];
     sections: { title: string; links: { name: string; href: string; icon?: React.ReactNode }[] }[];
-    promo: { title: string; subtitle: string; image: string; button: string };
   }> = {
     flowers: {
       categories: ["Dried Flower", "Pre-Rolls", "Moon Rocks"],
@@ -68,12 +68,6 @@ export default function Header({ categories }: HeaderProps) {
           ],
         },
       ],
-      promo: {
-        title: "2 OUNCES FOR $199.99",
-        subtitle: "Over 10+ Strains to Choose from",
-        image: "https://images.unsplash.com/photo-1628114241021-995f36e86684?q=80&w=300&auto=format&fit=crop",
-        button: "SHOP NOW",
-      },
     },
     edibles: {
       categories: ["Gummies", "Hard Candy", "Chocolates", "Baked Goods", "Capsules", "Phoenix Tears", "Beverages", "Tinctures", "Pantry", "Munchies/Snacks"],
@@ -104,12 +98,6 @@ export default function Header({ categories }: HeaderProps) {
           ],
         },
       ],
-      promo: {
-        title: "Sugar Jack's 200mg THC Gummies",
-        subtitle: "Best selling edibles and for good reason!",
-        image: "https://images.unsplash.com/photo-1582050041567-9cda33e4b158?q=80&w=300&auto=format&fit=crop",
-        button: "SHOP NOW",
-      },
     },
     vapes: {
       categories: ["Vape Cartridges", "Starter Kits", "Disposable Pens", "510 Thread Batteries"],
@@ -136,12 +124,6 @@ export default function Header({ categories }: HeaderProps) {
           ],
         },
       ],
-      promo: {
-        title: "Baked Vapes 2g Variations",
-        subtitle: "Baked Vapes now come in 2g variations for double the effects!",
-        image: "https://images.unsplash.com/photo-1594465919760-441fe5908ab0?q=80&w=300&auto=format&fit=crop",
-        button: "SHOP NOW",
-      },
     },
     concentrates: {
       categories: ["Live Resin", "Shatter", "Rosin", "Crumble", "Budder", "Wax", "Terp Sauce", "THC Diamonds", "Hash", "Distillate", "Oils"],
@@ -169,12 +151,6 @@ export default function Header({ categories }: HeaderProps) {
           ],
         },
       ],
-      promo: {
-        title: "Diamond Infused Blunts (High Rolla)",
-        subtitle: "AAAA Flowers Infused With Frozen Kief and THC-A Diamonds",
-        image: "https://images.unsplash.com/photo-1628114241021-995f36e86684?q=80&w=300&auto=format&fit=crop",
-        button: "VIEW PRODUCT",
-      },
     },
     cbd: {
       categories: ["CBD Edibles", "CBD Tinctures", "Topicals", "CBD Vapes"],
@@ -209,12 +185,6 @@ export default function Header({ categories }: HeaderProps) {
           ],
         },
       ],
-      promo: {
-        title: "Apex Edibles 30mg CBD Gummies",
-        subtitle: "These 30mg CBD Gummies are tasty and correctly dosed for effective and easy relief!",
-        image: "https://images.unsplash.com/photo-1628114241021-995f36e86684?q=80&w=300&auto=format&fit=crop",
-        button: "SHOP NOW",
-      },
     },
   };
 
@@ -234,7 +204,8 @@ export default function Header({ categories }: HeaderProps) {
       megaContent: undefined,
     },
     ...orderedCategories.map((cat) => {
-      const mega = MEGA_MENUS[cat.slug];
+      const megaConfig = MEGA_MENUS[cat.slug];
+      const mega = megaConfig ? { ...megaConfig, image: cat.image } : undefined;
       return {
         name: cat.name.toUpperCase(),
         href: `/shop?category=${cat.slug}`,
@@ -391,16 +362,17 @@ export default function Header({ categories }: HeaderProps) {
                                     </div>
                                 </div>
 
-                                {/* Right Col - Promo Banner */}
-                                <div className="col-lg-4">
-                                    <div className="promo-card bg-light rounded-lg overflow-hidden border p-4 text-center position-relative">
-                                        <div className="promo-content">
-                                            <h4 className="fw-900 mb-0">{link.megaContent.promo.title}</h4>
-                                            <p className="extra-small text-muted mb-3">{link.megaContent.promo.subtitle}</p>
-                                            <img src={link.megaContent.promo.image} className="img-fluid rounded mb-3" style={{ height: '140px', objectFit: 'cover' }} alt={link.megaContent.promo.title} />
-                                            <Link href="/shop" className="btn btn-plant w-100 fw-bold">{link.megaContent.promo.button}</Link>
-                                        </div>
-                                    </div>
+                                {/* Right Col - Category Image (top-aligned when the menu is tall, centered when it's short) */}
+                                <div className={cn("col-lg-4 d-flex", link.megaContent.categories.length > 5 ? "align-items-start" : "align-items-center")}>
+                                    <Link href={link.href} className="d-block rounded-lg overflow-hidden border position-relative mx-auto w-100" style={{ aspectRatio: '1 / 1', maxWidth: '220px' }}>
+                                        {link.megaContent.image ? (
+                                            <img src={link.megaContent.image} className="w-100 h-100" style={{ objectFit: 'cover' }} alt={link.name} />
+                                        ) : (
+                                            <div className="bg-light w-100 h-100 d-flex align-items-center justify-content-center text-muted small">
+                                                No image set
+                                            </div>
+                                        )}
+                                    </Link>
                                 </div>
                             </div>
                         </div>

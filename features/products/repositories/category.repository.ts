@@ -23,6 +23,13 @@ export class CategoryRepository {
     });
   }
 
+  async findFeatured() {
+    return prisma.category.findMany({
+      where: { featured: true, parentId: null },
+      orderBy: { name: "asc" },
+    });
+  }
+
   async findById(id: string) {
     return prisma.category.findUnique({
       where: { id },

@@ -11,6 +11,10 @@ export class CategoryService {
     return this.repo.findTree();
   }
 
+  async getFeaturedCategories() {
+    return this.repo.findFeatured();
+  }
+
   async getCategoryBySlug(slug: string) {
     return this.repo.findBySlug(slug);
   }

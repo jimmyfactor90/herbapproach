@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, slug, description, image, parentId } = body;
+    const { name, slug, description, image, parentId, featured } = body;
 
     const category = await prisma.category.create({
       data: {
@@ -19,6 +19,7 @@ export async function POST(req: Request) {
         slug,
         description,
         image,
+        featured: !!featured,
         parentId: parentId || null,
       },
     });
@@ -43,7 +44,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { id, name, slug, description, image, parentId } = body;
+    const { id, name, slug, description, image, parentId, featured } = body;
 
     const category = await prisma.category.update({
       where: { id },
@@ -52,6 +53,7 @@ export async function PUT(req: Request) {
         slug,
         description,
         image,
+        featured: !!featured,
         parentId: parentId || null,
       },
     });

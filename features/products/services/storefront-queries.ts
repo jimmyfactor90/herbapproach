@@ -42,6 +42,12 @@ export const getCachedCategoryTree = unstable_cache(
   { tags: ["categories"], revalidate: 3600 }
 );
 
+export const getCachedFeaturedCategories = unstable_cache(
+  () => categoryService.getFeaturedCategories(),
+  ["storefront-featured-categories"],
+  { tags: ["categories"], revalidate: 3600 }
+);
+
 export const getCachedCategoryBySlug = unstable_cache(
   (slug: string) => categoryService.getCategoryBySlug(slug),
   ["storefront-category-by-slug"],

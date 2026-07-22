@@ -1,5 +1,6 @@
 import {
   getCachedCategories,
+  getCachedFeaturedCategories,
   getCachedFeaturedProducts,
   getCachedHeroSlides,
 } from "@/features/products/services/storefront-queries";
@@ -17,11 +18,15 @@ import HoverPlayImage from "@/features/shared/components/HoverPlayImage";
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const [categories, featuredProducts, heroSlides] = await Promise.all([
+  const [categories, featuredCategories, featuredProducts, heroSlides] = await Promise.all([
     getCachedCategories(),
+    getCachedFeaturedCategories(),
     getCachedFeaturedProducts(8),
     getCachedHeroSlides(),
   ]);
+
+  // Fall back to the first 5 categories if the admin hasn't marked any as featured yet.
+  const homepageCategories = featuredCategories.length > 0 ? featuredCategories : categories.slice(0, 5);
 
   return (
     <div className="homepage-dispensary animate-fade-in">
@@ -36,7 +41,7 @@ export default async function HomePage() {
           </div>
 
           <div className="row row-cols-2 row-cols-lg-5 g-3">
-            {categories.slice(0, 5).map((cat) => (
+            {homepageCategories.slice(0, 5).map((cat) => (
               <div key={cat.id} className="col">
                 <Link
                   href={`/shop?category=${cat.slug}`}
