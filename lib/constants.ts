@@ -45,34 +45,34 @@ export const PAYMENT_STATUS = {
   REFUNDED: "REFUNDED",
 } as const;
 
-// Plant care levels
-export const CARE_LEVELS = [
-  { value: "EASY", label: "Easy", icon: "🟢" },
-  { value: "MEDIUM", label: "Medium", icon: "🟡" },
-  { value: "EXPERT", label: "Expert", icon: "🔴" },
+// Strain types
+export const STRAIN_TYPES = [
+  { value: "INDICA", label: "Indica", icon: "🌙" },
+  { value: "SATIVA", label: "Sativa", icon: "☀️" },
+  { value: "HYBRID", label: "Hybrid", icon: "🌗" },
 ] as const;
 
-// Sunlight options
-export const SUNLIGHT_OPTIONS = [
-  { value: "FULL_SUN", label: "Full Sun", icon: "☀️" },
-  { value: "PARTIAL_SUN", label: "Partial Sun", icon: "🌤️" },
-  { value: "INDIRECT", label: "Indirect Light", icon: "🌥️" },
-  { value: "LOW_LIGHT", label: "Low Light", icon: "🌙" },
+// Potency options
+export const POTENCY_LEVELS = [
+  { value: "HIGH_THC", label: "High Dose THC", icon: "🔴" },
+  { value: "LOW_THC", label: "Low Dose THC", icon: "🟡" },
+  { value: "BALANCED", label: "Balanced 1:1", icon: "⚖️" },
+  { value: "CBD", label: "CBD", icon: "🟢" },
 ] as const;
 
-// Plant types
-export const PLANT_TYPES = [
+// Growth method (Flowers/Pre-Rolls sourcing)
+export const GROWTH_METHODS = [
   { value: "INDOOR", label: "Indoor" },
   { value: "OUTDOOR", label: "Outdoor" },
-  { value: "BOTH", label: "Indoor & Outdoor" },
+  { value: "BOTH", label: "Greenhouse" },
 ] as const;
 
-// Plant sizes
-export const PLANT_SIZES = [
-  { value: "SMALL", label: "Small (up to 30cm)" },
-  { value: "MEDIUM", label: "Medium (30-60cm)" },
-  { value: "LARGE", label: "Large (60-120cm)" },
-  { value: "EXTRA_LARGE", label: "Extra Large (120cm+)" },
+// Flower quality grade
+export const FLOWER_GRADES = [
+  { value: "SMALL", label: "AAA" },
+  { value: "MEDIUM", label: "AAAA" },
+  { value: "LARGE", label: "AAAA+" },
+  { value: "EXTRA_LARGE", label: "Craft" },
 ] as const;
 
 // Pagination

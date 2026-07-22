@@ -43,7 +43,6 @@ export default function HeroSlideForm() {
             value={image}
             onChange={(url) => setImage(url)}
             onRemove={() => setImage("")}
-            crop="free"
           />
         </div>
         <div>

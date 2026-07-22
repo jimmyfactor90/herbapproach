@@ -257,7 +257,7 @@ export default function CheckoutForm({ user }: { user: any }) {
               
               <div className="checkout-items mb-4 overflow-auto" style={{ maxHeight: '300px' }}>
                 {items.map((item) => (
-                  <div key={item.productId} className="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-light">
+                  <div key={item.id} className="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-light">
                     <div className="position-relative">
                       <img src={item.image} className="rounded border" style={{ width: '60px', height: '60px', objectFit: 'cover' }} />
                       <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" style={{ fontSize: '0.6rem' }}>
@@ -265,7 +265,10 @@ export default function CheckoutForm({ user }: { user: any }) {
                       </span>
                     </div>
                     <div className="flex-grow-1">
-                      <h6 className="small fw-bold mb-0">{item.name}</h6>
+                      <h6 className="small fw-bold mb-0">
+                        {item.name}
+                        {item.weight && <span className="text-muted fw-normal"> &middot; {item.weight}g</span>}
+                      </h6>
                       <span className="text-muted small">{formatPrice(item.price)}</span>
                     </div>
                     <div className="fw-bold small">{formatPrice(item.price * item.quantity)}</div>

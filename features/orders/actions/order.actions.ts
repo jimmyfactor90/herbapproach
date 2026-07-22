@@ -56,6 +56,8 @@ export async function createOrder(data: {
         items: {
           create: data.items.map((item) => ({
             productId: item.productId,
+            variantId: item.variantId || null,
+            weight: item.weight || null,
             quantity: item.quantity,
             price: item.price,
             total: item.price * item.quantity,

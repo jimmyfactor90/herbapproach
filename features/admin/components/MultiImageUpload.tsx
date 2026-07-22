@@ -1,6 +1,9 @@
 "use client";
 
-import { Widget } from "@uploadcare/react-widget";
+import { useRef, useState } from "react";
+import { FaCloudUploadAlt, FaSpinner } from "react-icons/fa";
+import { toast } from "react-hot-toast";
+import { uploadImageAction } from "../actions/upload.actions";
 
 interface MultiImageUploadProps {
   value: string[];
@@ -8,8 +11,28 @@ interface MultiImageUploadProps {
 }
 
 export default function MultiImageUpload({ value, onChange }: MultiImageUploadProps) {
-  const addImage = (url: string) => onChange([...value, url]);
+  const [isUploading, setIsUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const removeImage = (index: number) => onChange(value.filter((_, i) => i !== index));
+
+  const handleFiles = async (files: FileList) => {
+    setIsUploading(true);
+    try {
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append("file", file);
+        uploaded.push(await uploadImageAction(formData));
+      }
+      onChange([...value, ...uploaded]);
+    } catch (error: any) {
+      toast.error(error.message || "Upload failed");
+    } finally {
+      setIsUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
 
   return (
     <div className="multi-image-upload-wrapper">
@@ -34,19 +57,27 @@ export default function MultiImageUpload({ value, onChange }: MultiImageUploadPr
         ))}
       </div>
 
-      <div className="upload-container border border-dashed rounded p-4 text-center bg-light">
-        <Widget
-          publicKey={process.env.NEXT_PUBLIC_UPLOADCARE_PUBLIC_KEY || "demopublickey"}
-          onChange={(fileInfo) => {
-            if (fileInfo.cdnUrl) {
-              addImage(fileInfo.cdnUrl);
-            }
+      <label className="upload-container border border-dashed rounded p-4 text-center bg-light d-block mb-0" style={{ cursor: isUploading ? "wait" : "pointer" }}>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+          multiple
+          className="d-none"
+          disabled={isUploading}
+          onChange={(e) => {
+            if (e.target.files && e.target.files.length > 0) handleFiles(e.target.files);
           }}
-          clearable
-          crop="free"
         />
-        <p className="mt-2 text-muted small">Add another photo</p>
-      </div>
+        {isUploading ? (
+          <FaSpinner className="animate-spin" size={20} />
+        ) : (
+          <FaCloudUploadAlt size={20} className="text-muted" />
+        )}
+        <p className="mt-2 text-muted small mb-0">
+          {isUploading ? "Uploading..." : "Add photos"}
+        </p>
+      </label>
     </div>
   );
 }

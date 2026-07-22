@@ -22,8 +22,9 @@ export async function createProductAction(data: any) {
     isActive: data.isActive,
     featured: data.featured,
     categoryId: data.categoryId,
-    careLevel: data.careLevel,
-    sunlight: data.sunlight,
+    strainType: data.strainType,
+    potency: data.potency,
+    weight: data.weight,
     indoorOutdoor: data.indoorOutdoor,
     size: data.size,
     petFriendly: data.petFriendly,
@@ -34,6 +35,14 @@ export async function createProductAction(data: any) {
     },
     images: {
       create: (data.images || []).map((url: string) => ({ url })),
+    },
+    variants: {
+      create: (data.variants || []).map((v: any) => ({
+        weight: v.weight,
+        price: v.price,
+        comparePrice: v.comparePrice || null,
+        sku: v.sku,
+      })),
     },
   });
 
@@ -62,8 +71,9 @@ export async function updateProductAction(id: string, data: any) {
     isActive: data.isActive,
     featured: data.featured,
     categoryId: data.categoryId,
-    careLevel: data.careLevel,
-    sunlight: data.sunlight,
+    strainType: data.strainType,
+    potency: data.potency,
+    weight: data.weight,
     indoorOutdoor: data.indoorOutdoor,
     size: data.size,
     petFriendly: data.petFriendly,
@@ -75,6 +85,15 @@ export async function updateProductAction(id: string, data: any) {
     images: {
       deleteMany: {},
       create: (data.images || []).map((url: string) => ({ url })),
+    },
+    variants: {
+      deleteMany: {},
+      create: (data.variants || []).map((v: any) => ({
+        weight: v.weight,
+        price: v.price,
+        comparePrice: v.comparePrice || null,
+        sku: v.sku,
+      })),
     },
   });
 

@@ -2,9 +2,10 @@ import { getCachedProductBySlug, getCachedShopProducts } from "@/features/produc
 import { notFound } from "next/navigation";
 import {
   FaStar, FaCheckCircle, FaFacebook, FaTwitter,
-  FaInstagram, FaPinterest, FaEnvelope, FaChevronLeft, FaChevronRight
+  FaInstagram, FaPinterest, FaEnvelope, FaCannabis
 } from "react-icons/fa";
-import { formatPrice, calculateDiscount } from "@/lib/utils";
+import { calculateDiscount, getRatingStars } from "@/lib/utils";
+import { STRAIN_TYPES } from "@/lib/constants";
 import Link from "next/link";
 import ProductCard from "@/features/products/components/ProductCard";
 import ProductActions from "@/features/products/components/ProductActions";
@@ -28,8 +29,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
   });
 
   const discount = calculateDiscount(product.price, product.comparePrice || 0);
-  const wasPrice = product.comparePrice || product.price;
-  const savings = wasPrice - product.price;
+
+  const approvedReviews = (product as any).reviews || [];
+  const reviewCount = approvedReviews.length;
+  const avgRating = reviewCount > 0
+    ? approvedReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewCount
+    : 0;
+  const ratingStars = getRatingStars(avgRating);
+  const strainType = STRAIN_TYPES.find((s) => s.value === product.strainType);
 
   return (
     <div className="bg-white pb-5 animate-fade-in">
@@ -90,50 +97,29 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           {/* Right: Product Info */}
           <div className="col-lg-7">
-            <h1 className="h3 fw-900 text-uppercase mb-3" style={{ letterSpacing: '-0.5px' }}>
+            <h1 className="h3 fw-900 text-uppercase mb-2" style={{ letterSpacing: '-0.5px' }}>
               {product.name.toUpperCase()}
             </h1>
 
-            {/* Reviews */}
-            <div className="d-flex align-items-center gap-3 mb-4">
-              <span className="badge bg-light text-dark px-3 py-2 rounded-pill fw-bold small">Review:</span>
-              <div className="text-warning d-flex gap-1">
-                {[1, 2, 3, 4, 5].map(s => <FaStar key={s} size={16} />)}
-              </div>
+            <div className="d-flex align-items-center gap-2 mb-3">
+              <FaCannabis size={12} className="text-primary" />
+              <span className="small fw-bold text-muted text-uppercase">{strainType?.label || "Hybrid"}</span>
             </div>
 
-            <hr />
-
-            {/* Pricing - Herb Approach Style */}
-            <div className="mb-4">
-              <table className="pricing-table">
-                <tbody>
-                  {product.comparePrice && product.comparePrice > product.price && (
-                    <>
-                      <tr>
-                        <td className="pe-4 py-1 text-muted small fw-bold">Was:</td>
-                        <td className="py-1 text-decoration-line-through text-muted">{formatPrice(product.comparePrice)}</td>
-                      </tr>
-                      <tr>
-                        <td className="pe-4 py-1 text-muted small fw-bold">Promo Price:</td>
-                        <td className="py-1 fw-bold h5 m-0">{formatPrice(product.price)}</td>
-                      </tr>
-                      <tr>
-                        <td className="pe-4 py-1 text-muted small fw-bold">You save:</td>
-                        <td className="py-1 text-success fw-bold">
-                          {formatPrice(savings)} ({discount}% OFF)
-                        </td>
-                      </tr>
-                    </>
-                  )}
-                  {(!product.comparePrice || product.comparePrice <= product.price) && (
-                    <tr>
-                      <td className="pe-4 py-1 text-muted small fw-bold">Price:</td>
-                      <td className="py-1 fw-bold h4 m-0">{formatPrice(product.price)}</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+            {/* Reviews */}
+            <div className="d-flex align-items-center gap-3 mb-4">
+              {reviewCount > 0 ? (
+                <>
+                  <div className="text-warning d-flex gap-1">
+                    {ratingStars.map((star, i) => (
+                      <FaStar key={i} size={16} style={{ opacity: star === "empty" ? 0.25 : 1 }} />
+                    ))}
+                  </div>
+                  <span className="small text-muted">{avgRating.toFixed(1)} out of 5 ({reviewCount} review{reviewCount === 1 ? "" : "s"})</span>
+                </>
+              ) : (
+                <span className="small text-muted">No reviews yet</span>
+              )}
             </div>
 
             <hr />
@@ -179,7 +165,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 Specification
               </button>
               <button className="btn btn-outline-dark border-0 px-4 py-2 fw-bold rounded-0 text-uppercase small" data-bs-toggle="tab" data-bs-target="#tab-reviews">
-                Reviews (12)
+                Reviews ({reviewCount})
               </button>
               <button className="btn btn-outline-dark border-0 px-4 py-2 fw-bold rounded-0 text-uppercase small" data-bs-toggle="tab" data-bs-target="#tab-refer">
                 Refer a Friend
@@ -206,7 +192,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <tbody>
                     <tr><td className="fw-bold">SKU</td><td>{product.sku}</td></tr>
                     <tr><td className="fw-bold">Category</td><td>{product.category.name}</td></tr>
-                    <tr><td className="fw-bold">Weight</td><td>{product.weight ? `${product.weight}g` : 'N/A'}</td></tr>
+                    <tr><td className="fw-bold">Strain Type</td><td>{strainType?.label || "Hybrid"}</td></tr>
+                    <tr>
+                      <td className="fw-bold">Weight</td>
+                      <td>
+                        {product.variants && product.variants.length > 0
+                          ? product.variants.map((v: any) => `${v.weight}g`).join(", ")
+                          : product.weight ? `${product.weight}g` : "N/A"}
+                      </td>
+                    </tr>
                     <tr><td className="fw-bold">Stock</td><td>{product.inventory?.quantity || 0} units</td></tr>
                   </tbody>
                 </table>
@@ -215,9 +209,31 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Reviews Tab */}
             <div className="tab-pane fade" id="tab-reviews">
-              <div className="mx-auto text-center py-5" style={{ maxWidth: '850px' }}>
-                <h3 className="fw-900 mb-3">Customer Reviews</h3>
-                <p className="text-muted">No reviews yet. Be the first to review this product!</p>
+              <div className="mx-auto" style={{ maxWidth: '850px' }}>
+                <h3 className="fw-900 mb-4 text-center">Customer Reviews</h3>
+                {reviewCount > 0 ? (
+                  <div className="d-flex flex-column gap-4">
+                    {approvedReviews.map((review: any) => (
+                      <div key={review.id} className="border-bottom pb-4">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <div className="text-warning d-flex gap-1 mb-1">
+                              {getRatingStars(review.rating).map((star, i) => (
+                                <FaStar key={i} size={13} style={{ opacity: star === "empty" ? 0.25 : 1 }} />
+                              ))}
+                            </div>
+                            <span className="fw-bold small">{review.user?.name || "Anonymous"}</span>
+                          </div>
+                          <span className="text-muted extra-small">{new Date(review.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        {review.title && <p className="fw-bold small mb-1">{review.title}</p>}
+                        {review.comment && <p className="text-muted small mb-0">{review.comment}</p>}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted text-center">No reviews yet. Be the first to review this product!</p>
+                )}
               </div>
             </div>
 

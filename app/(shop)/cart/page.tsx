@@ -45,13 +45,13 @@ export default function CartPage() {
                     </thead>
                     <tbody>
                       {items.map((item) => (
-                        <tr key={item.productId}>
+                        <tr key={item.id}>
                           <td className="px-4 py-4 border-bottom">
                             <div className="d-flex align-items-center gap-3">
-                              <img 
-                                src={item.image} 
-                                alt={item.name} 
-                                className="rounded border shadow-sm" 
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="rounded border shadow-sm"
                                 style={{ width: '80px', height: '80px', objectFit: 'cover' }}
                               />
                               <div>
@@ -59,10 +59,11 @@ export default function CartPage() {
                                   <Link href={`/product/${item.slug}`} className="text-dark hover-text-primary text-decoration-none">
                                     {item.name}
                                   </Link>
+                                  {item.weight && <span className="text-muted small fw-normal"> &middot; {item.weight}g</span>}
                                 </h6>
-                                <button 
+                                <button
                                   className="btn btn-link link-danger p-0 small text-decoration-none d-flex align-items-center gap-1"
-                                  onClick={() => removeItem(item.productId)}
+                                  onClick={() => removeItem(item.id)}
                                 >
                                   <FaTrash size={12} /> Remove
                                 </button>
@@ -74,16 +75,16 @@ export default function CartPage() {
                           </td>
                           <td className="py-4 border-bottom text-center">
                             <div className="d-inline-flex align-items-center border rounded-pill overflow-hidden bg-light mx-auto">
-                              <button 
+                              <button
                                 className="btn btn-link link-dark text-decoration-none px-2 py-0 border-0"
-                                onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               >
                                 -
                               </button>
                               <span className="px-2 fw-bold small">{item.quantity}</span>
-                              <button 
+                              <button
                                 className="btn btn-link link-dark text-decoration-none px-2 py-0 border-0"
-                                onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               >
                                 +
                               </button>

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
@@ -23,6 +23,7 @@
     "better-auth": "^1.2.0",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "cloudinary": "^2.10.0",
     "date-fns": "^4.1.0",
     "nanoid": "^5.0.6",
     "next": "^16.2.9",

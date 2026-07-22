@@ -30,10 +30,13 @@ export class ProductService {
 
   async getShopProducts(params: {
     category?: string;
-    careLevel?: string;
-    sunlight?: string;
+    strainType?: string;
+    potency?: string;
     minPrice?: number;
     maxPrice?: number;
+    weight?: number;
+    inStock?: boolean;
+    onSale?: boolean;
     page?: number;
     pageSize?: number;
     sort?: "price_asc" | "price_desc" | "newest";
@@ -43,10 +46,19 @@ export class ProductService {
 
     const where: any = { isActive: true };
 
-    if (params.category) where.category = { slug: params.category };
-    if (params.careLevel) where.careLevel = params.careLevel;
-    if (params.sunlight) where.sunlight = params.sunlight;
-    
+    if (params.category) {
+      where.category = {
+        OR: [{ slug: params.category }, { parent: { slug: params.category } }],
+      };
+    }
+    if (params.strainType) where.strainType = params.strainType;
+    if (params.potency) where.potency = params.potency;
+    if (params.weight !== undefined) where.weight = params.weight;
+    if (params.inStock) where.inventory = { quantity: { gt: 0 } };
+    // comparePrice is only ever set by the admin when a product is actually discounted,
+    // so its presence is used as the "on sale" signal (see calculateDiscount in lib/utils.ts).
+    if (params.onSale) where.comparePrice = { gt: 0 };
+
     if (params.minPrice !== undefined || params.maxPrice !== undefined) {
       where.price = {};
       if (params.minPrice !== undefined) where.price.gte = params.minPrice;

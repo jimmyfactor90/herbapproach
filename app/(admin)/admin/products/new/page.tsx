@@ -5,7 +5,7 @@ import { FaPlus } from "react-icons/fa";
 
 export default async function NewProductPage() {
   const categoryService = new CategoryService();
-  const categories = await categoryService.getAllCategories();
+  const categories = await categoryService.getCategoryTree();
 
   return (
     <div className="container-fluid py-4 animate-fade-in">

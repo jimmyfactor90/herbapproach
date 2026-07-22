@@ -1,122 +1,42 @@
 // ===== COMPONENT: FOOTER =====
 
-.footer-plant {
-  background: $dark;
-  color: $gray-300;
-  padding-top: 4rem;
+.footer-light {
+  background: $white;
+  color: $gray-700;
 
-  .footer-brand {
-    font-family: $font-family-heading;
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: $white;
+  .hover-text-primary:hover {
+    color: $primary !important;
+  }
+
+  .footer-social-icon {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .footer-desc {
-    color: $gray-400;
-    max-width: 320px;
-    line-height: 1.7;
-    font-size: 0.9375rem;
-  }
-
-  .footer-heading {
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: $primary;
     color: $white;
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin-bottom: 1.25rem;
-  }
+    transition: $transition-base;
 
-  .footer-links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-
-    li + li {
-      margin-top: 0.625rem;
-    }
-
-    a {
-      color: $gray-400;
-      text-decoration: none;
-      transition: $transition-fast;
-      font-size: 0.9375rem;
-
-      &:hover {
-        color: $secondary;
-        padding-left: 4px;
-      }
+    &:hover {
+      background: darken($primary, 8%);
+      transform: translateY(-2px);
     }
   }
 
-  .footer-social {
-    display: flex;
-    gap: 0.75rem;
+  .input-group {
+    .form-control {
+      border-radius: $border-radius 0 0 $border-radius;
 
-    a {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      color: $gray-300;
-      font-size: 1.125rem;
-      transition: $transition-base;
-
-      &:hover {
-        background: $primary;
-        color: $white;
-        transform: translateY(-2px);
+      &:focus {
+        border-color: $secondary;
+        box-shadow: none;
       }
     }
-  }
 
-  .footer-newsletter {
-    .input-group {
-      .form-control {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: $white;
-        border-radius: $border-radius 0 0 $border-radius;
-
-        &::placeholder {
-          color: $gray-500;
-        }
-
-        &:focus {
-          border-color: $secondary;
-          box-shadow: none;
-        }
-      }
-
-      .btn {
-        border-radius: 0 $border-radius $border-radius 0;
-      }
-    }
-  }
-
-  .footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 1.5rem 0;
-    margin-top: 3rem;
-
-    .footer-bottom-links {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-
-      a {
-        color: $gray-500;
-        text-decoration: none;
-        font-size: 0.875rem;
-
-        &:hover { color: $gray-300; }
-      }
+    .btn {
+      border-radius: 0 $border-radius $border-radius 0;
     }
   }
 }

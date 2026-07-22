@@ -25,7 +25,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     notFound();
   }
 
-  const categories = await categoryService.getAllCategories();
+  const categories = await categoryService.getCategoryTree();
 
   // Create update action with bound ID
   const boundUpdateAction = updateProductAction.bind(null, id);

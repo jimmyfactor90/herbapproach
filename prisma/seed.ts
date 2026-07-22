@@ -39,7 +39,7 @@ async function main() {
       image: "https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?q=80&w=1000",
     },
     {
-      name: "Concentrates",
+      name: "Extracts",
       slug: "concentrates",
       description: "High potency Shatter, Budder, Live Resin, and Diamonds.",
       image: "https://images.unsplash.com/photo-1614728263952-84ea206f99b6?q=80&w=1000",
@@ -62,6 +62,18 @@ async function main() {
       description: "Non-psychoactive relief. Oils, Capsules, and Topicals.",
       image: "https://images.unsplash.com/photo-1543168256-418811576931?q=80&w=1000",
     },
+    {
+      name: "Pre-Rolls",
+      slug: "pre-rolls",
+      description: "Ready-to-smoke Infused and Dried Flower Pre-Rolls.",
+      image: "https://images.unsplash.com/photo-1592492152545-9695d3f473f4?q=80&w=1000",
+    },
+    {
+      name: "Accessories",
+      slug: "accessories",
+      description: "Grinders, Rolling Papers, Dab Rigs, and other essentials.",
+      image: "https://images.unsplash.com/photo-1560999448-1288f0bc83e3?q=80&w=1000",
+    },
   ];
 
   for (const cat of categories) {
@@ -74,6 +86,52 @@ async function main() {
 
   const flowersCat = await prisma.category.findUnique({ where: { slug: "flowers" } });
   const ediblesCat = await prisma.category.findUnique({ where: { slug: "edibles" } });
+  const concentratesCat = await prisma.category.findUnique({ where: { slug: "concentrates" } });
+  const vapesCat = await prisma.category.findUnique({ where: { slug: "vapes" } });
+  const cbdCat = await prisma.category.findUnique({ where: { slug: "cbd" } });
+  const preRollsCat = await prisma.category.findUnique({ where: { slug: "pre-rolls" } });
+  const accessoriesCat = await prisma.category.findUnique({ where: { slug: "accessories" } });
+
+  // 1b. Subcategories
+  const subcategories = [
+    { name: "Gummies", slug: "edibles-gummies", parentId: ediblesCat!.id },
+    { name: "Tinctures", slug: "edibles-tinctures", parentId: ediblesCat!.id },
+    { name: "Beverages", slug: "edibles-beverages", parentId: ediblesCat!.id },
+    { name: "Baked Goods", slug: "edibles-baked-goods", parentId: ediblesCat!.id },
+    { name: "Chocolates", slug: "edibles-chocolates", parentId: ediblesCat!.id },
+    { name: "Capsules", slug: "edibles-capsules", parentId: ediblesCat!.id },
+
+    { name: "Vape Cartridges", slug: "vapes-cartridges", parentId: vapesCat!.id },
+    { name: "Disposable Pens", slug: "vapes-disposable", parentId: vapesCat!.id },
+    { name: "Starter Kits", slug: "vapes-starter-kits", parentId: vapesCat!.id },
+
+    { name: "CBD Tinctures", slug: "cbd-tinctures", parentId: cbdCat!.id },
+    { name: "CBD Edibles", slug: "cbd-edibles", parentId: cbdCat!.id },
+    { name: "Topicals", slug: "cbd-topicals", parentId: cbdCat!.id },
+    { name: "CBD Vapes", slug: "cbd-vapes", parentId: cbdCat!.id },
+
+    { name: "Live Resin", slug: "concentrates-live-resin", parentId: concentratesCat!.id },
+    { name: "Shatter", slug: "concentrates-shatter", parentId: concentratesCat!.id },
+    { name: "Rosin", slug: "concentrates-rosin", parentId: concentratesCat!.id },
+    { name: "Wax", slug: "concentrates-wax", parentId: concentratesCat!.id },
+    { name: "Distillate", slug: "concentrates-distillate", parentId: concentratesCat!.id },
+
+    { name: "Infused Pre-Rolls", slug: "pre-rolls-infused", parentId: preRollsCat!.id },
+    { name: "Dried Flower Pre-Rolls", slug: "pre-rolls-dried-flower", parentId: preRollsCat!.id },
+
+    { name: "Batteries", slug: "accessories-batteries", parentId: accessoriesCat!.id },
+    { name: "Grinders", slug: "accessories-grinders", parentId: accessoriesCat!.id },
+    { name: "Rolling Papers", slug: "accessories-rolling-papers", parentId: accessoriesCat!.id },
+    { name: "Dab Rigs", slug: "accessories-dab-rigs", parentId: accessoriesCat!.id },
+  ];
+
+  for (const sub of subcategories) {
+    await prisma.category.upsert({
+      where: { slug: sub.slug },
+      update: sub,
+      create: sub,
+    });
+  }
 
   // 2. Products
   const products = [
@@ -86,9 +144,9 @@ async function main() {
       sku: "FLWR-CRM-001",
       mainImage: "https://images.pexels.com/photos/5650024/pexels-photo-5650024.jpeg?auto=compress&cs=tinysrgb&w=1000",
       featured: true,
-      careLevel: "MEDIUM", // Reusing this field for "Difficulty" or similar
-      sunlight: "INDIRECT",
-      waterFrequency: "Hybrid - 50% Indica / 50% Sativa",
+      strainType: "HYBRID",
+      potency: "HIGH_THC",
+      waterFrequency: "50% Indica / 50% Sativa",
       petFriendly: false,
       indoorOutdoor: "INDOOR",
       size: "MEDIUM",
@@ -103,8 +161,8 @@ async function main() {
       sku: "FLWR-BBH-001",
       mainImage: "https://images.pexels.com/photos/5650017/pexels-photo-5650017.jpeg?auto=compress&cs=tinysrgb&w=1000",
       featured: true,
-      careLevel: "EASY",
-      sunlight: "FULL_SUN",
+      strainType: "SATIVA",
+      potency: "HIGH_THC",
       waterFrequency: "Sativa Dominant",
       petFriendly: false,
       indoorOutdoor: "INDOOR",
@@ -120,8 +178,8 @@ async function main() {
       sku: "EDBL-GUM-001",
       mainImage: "https://images.pexels.com/photos/5469037/pexels-photo-5469037.jpeg?auto=compress&cs=tinysrgb&w=1000",
       featured: false,
-      careLevel: "EASY",
-      sunlight: "LOW_LIGHT",
+      strainType: "HYBRID",
+      potency: "BALANCED",
       waterFrequency: "Mixed Fruit Pack",
       petFriendly: false,
       indoorOutdoor: "INDOOR",

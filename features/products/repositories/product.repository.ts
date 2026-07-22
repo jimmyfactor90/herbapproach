@@ -14,7 +14,12 @@ export class ProductRepository {
       orderBy: params.orderBy || { createdAt: "desc" },
       take: params.take,
       skip: params.skip,
-      include: params.include || { category: true, images: true, inventory: true },
+      include: params.include || {
+        category: true,
+        images: true,
+        inventory: true,
+        reviews: { where: { isApproved: true }, select: { rating: true } },
+      },
     });
   }
 
@@ -25,6 +30,7 @@ export class ProductRepository {
         category: true,
         images: true,
         inventory: true,
+        variants: { orderBy: { weight: "asc" } },
         reviews: {
           include: { user: true },
           where: { isApproved: true },

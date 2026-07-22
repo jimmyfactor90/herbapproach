@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FaHeart, FaShoppingCart, FaEye, FaLeaf, FaSun, FaStar, FaWeightHanging } from "react-icons/fa";
+import { FaHeart, FaShoppingCart, FaEye, FaCannabis, FaTint, FaStar, FaWeightHanging } from "react-icons/fa";
 import { formatPrice, calculateDiscount, getRatingStars } from "@/lib/utils";
-import { CARE_LEVELS, SUNLIGHT_OPTIONS } from "@/lib/constants";
+import { STRAIN_TYPES, POTENCY_LEVELS } from "@/lib/constants";
 import { useCartStore } from "@/features/cart/store/cart.store";
+import { useWishlistStore } from "@/features/wishlist/store/wishlist.store";
+import { cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 
 interface ProductCardProps {
@@ -14,13 +16,24 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
+  const toggleWishlist = useWishlistStore((state) => state.toggleItem);
+  const isWishlisted = useWishlistStore((state) => state.isWishlisted(product.id));
   const discount = calculateDiscount(product.price, product.comparePrice || 0);
-  const careLevel = CARE_LEVELS.find((c) => c.value === product.careLevel);
-  const sunlight = SUNLIGHT_OPTIONS.find((s) => s.value === product.sunlight);
+  const strainType = STRAIN_TYPES.find((s) => s.value === product.strainType);
+  const potency = POTENCY_LEVELS.find((p) => p.value === product.potency);
+
+  const reviews: { rating: number }[] = product.reviews || [];
+  const reviewCount = reviews.length;
+  const avgRating = reviewCount > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount : 0;
+  const ratingStars = getRatingStars(avgRating);
+
+  const inStock = (product.inventory?.quantity ?? 0) > 0;
+  const pricePerGram = product.weight ? product.price / product.weight : null;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!inStock) return;
     addItem({
       id: product.sku,
       productId: product.id,
@@ -37,21 +50,40 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="product-card-premium h-100 bg-white border border-gray-200 rounded-lg overflow-hidden position-relative animate-fade-in group">
       {/* 1. Badge Overlay */}
       <div className="product-badges-top">
-        {discount > 0 && (
+        {!inStock && (
+          <div className="badge-sale-flat bg-secondary">
+            OUT OF STOCK
+          </div>
+        )}
+        {inStock && discount > 0 && (
           <div className="badge-sale-flat">
             {discount}% OFF
           </div>
         )}
-        {product.featured && !discount && (
+        {inStock && product.featured && !discount && (
           <div className="badge-featured-flat">
             TOP PICK
           </div>
         )}
       </div>
 
-      <div className="wishlist-btn-absolute opacity-0 group-hover-opacity-100">
-         <button className="btn btn-white btn-sm shadow-sm rounded-circle p-2">
-            <FaHeart className="text-muted hover-text-danger" size={14} />
+      <div className={cn("wishlist-btn-absolute", !isWishlisted && "opacity-0 group-hover-opacity-100")}>
+         <button
+           onClick={(e) => {
+             e.preventDefault();
+             e.stopPropagation();
+             toggleWishlist({
+               id: product.id,
+               name: product.name,
+               price: product.price,
+               image: product.mainImage,
+               slug: product.slug,
+               category: product.category?.name,
+             });
+           }}
+           className="btn btn-white btn-sm shadow-sm rounded-circle p-2"
+         >
+            <FaHeart className={isWishlisted ? "text-danger" : "text-muted hover-text-danger"} size={14} />
          </button>
       </div>
 
@@ -82,36 +114,48 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* 3. Rating Row */}
         <div className="d-flex align-items-center gap-1 mb-2">
-           <div className="stars-gold small d-flex text-accent">
-              <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
-           </div>
-           <span className="text-muted" style={{ fontSize: '0.7rem' }}>(24)</span>
+          {reviewCount > 0 ? (
+            <>
+              <div className="stars-gold small d-flex text-accent">
+                {ratingStars.map((star, i) => (
+                  <FaStar key={i} style={{ opacity: star === "empty" ? 0.25 : 1 }} />
+                ))}
+              </div>
+              <span className="text-muted" style={{ fontSize: '0.7rem' }}>({reviewCount})</span>
+            </>
+          ) : (
+            <span className="text-muted" style={{ fontSize: '0.7rem' }}>No reviews yet</span>
+          )}
         </div>
 
-        {/* 4. Plant Metadata Tags (Clean like weight selection in ref) */}
+        {/* 4. Strain Metadata Tags */}
         <div className="d-flex gap-2 mb-3">
            <div className="tag-pill">
-              <FaLeaf size={10} className="me-1" /> {careLevel?.label || "Easy"}
+              <FaCannabis size={10} className="me-1" /> {strainType?.label || "Hybrid"}
            </div>
            <div className="tag-pill">
-              <FaSun size={10} className="me-1" /> {sunlight?.label || "Indirect"}
+              <FaTint size={10} className="me-1" /> {potency?.label || "Balanced 1:1"}
            </div>
         </div>
 
         {/* 5. Pricing info */}
-        <div className="price-container d-flex align-items-baseline gap-2 mb-3">
+        <div className="price-container d-flex align-items-baseline gap-2 mb-1">
           <span className="current-price h5 fw-bold text-dark m-0">{formatPrice(product.price)}</span>
           {product.comparePrice > 0 && (
             <span className="text-muted small text-decoration-line-through">{formatPrice(product.comparePrice)}</span>
           )}
         </div>
+        <div className="text-muted extra-small mb-3">
+          {pricePerGram ? <>{formatPrice(pricePerGram)}/g &middot; {product.weight}g</> : " "}
+        </div>
 
         {/* 6. Main CTA Button */}
-        <button 
+        <button
           onClick={handleAddToCart}
+          disabled={!inStock}
           className="btn btn-outline-primary-plant w-100 rounded-pill text-uppercase fw-bold small py-2 d-flex align-items-center justify-content-center gap-2"
         >
-          <FaShoppingCart size={14} /> Add to Basket
+          <FaShoppingCart size={14} /> {inStock ? "Add to Basket" : "Out of Stock"}
         </button>
       </div>
     </div>

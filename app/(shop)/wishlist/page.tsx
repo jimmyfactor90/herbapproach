@@ -4,24 +4,30 @@ import Link from "next/link";
 import { FaHeart, FaTrash, FaShoppingCart, FaArrowLeft } from "react-icons/fa";
 import { formatPrice } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { useWishlistStore } from "@/features/wishlist/store/wishlist.store";
+import { useCartStore } from "@/features/cart/store/cart.store";
+import { toast } from "react-hot-toast";
 
 export default function WishlistPage() {
   const [mounted, setMounted] = useState(false);
-  const [wishlist, setWishlist] = useState<any[]>([]);
+  const { items: wishlist, removeItem: removeFromWishlist } = useWishlistStore();
+  const addToCart = useCartStore((state) => state.addItem);
 
   useEffect(() => {
     setMounted(true);
-    // In a real app, this would fetch from a store or API
-    const savedWishlist = localStorage.getItem("wishlist");
-    if (savedWishlist) {
-      setWishlist(JSON.parse(savedWishlist));
-    }
   }, []);
 
-  const removeFromWishlist = (id: string) => {
-    const updated = wishlist.filter(item => item.id !== id);
-    setWishlist(updated);
-    localStorage.setItem("wishlist", JSON.stringify(updated));
+  const handleAddToCart = (item: (typeof wishlist)[number]) => {
+    addToCart({
+      id: item.id,
+      productId: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      quantity: 1,
+      slug: item.slug,
+    });
+    toast.success(`${item.name} added to cart!`);
   };
 
   if (!mounted) return null;
@@ -68,7 +74,10 @@ export default function WishlistPage() {
                       </td>
                       <td className="px-4 py-4 border-0 text-end">
                         <div className="d-flex justify-content-end gap-2">
-                          <button className="btn btn-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
+                          <button
+                            onClick={() => handleAddToCart(item)}
+                            className="btn btn-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
+                          >
                             <FaShoppingCart size={12} /> Add to Cart
                           </button>
                           <button 

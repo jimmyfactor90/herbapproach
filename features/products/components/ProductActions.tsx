@@ -3,34 +3,123 @@
 import { useState } from "react";
 import { FaShoppingCart, FaHeart, FaMinus, FaPlus } from "react-icons/fa";
 import { useCartStore } from "@/features/cart/store/cart.store";
+import { useWishlistStore } from "@/features/wishlist/store/wishlist.store";
 import { toast } from "react-hot-toast";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, calculateDiscount, cn } from "@/lib/utils";
 
 export default function ProductActions({ product }: { product: any }) {
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
+  const toggleWishlist = useWishlistStore((state) => state.toggleItem);
+  const isWishlisted = useWishlistStore((state) => state.isWishlisted(product.id));
 
-  const handleAddToCart = () => {
-    addItem({
-      id: product.sku,
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.mainImage,
-      quantity: quantity,
-      slug: product.slug,
-    });
-    toast.success(`Added ${quantity} ${product.name} to your cart!`);
-  };
+  const variants: any[] = product.variants || [];
+  const hasVariants = variants.length > 0;
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(hasVariants ? variants[0].id : null);
+  const selectedVariant = hasVariants ? variants.find((v) => v.id === selectedVariantId) : null;
+
+  const activePrice = selectedVariant ? selectedVariant.price : product.price;
+  const activeComparePrice = selectedVariant ? selectedVariant.comparePrice : product.comparePrice;
+  const activeWeight = selectedVariant ? selectedVariant.weight : product.weight;
+  const activeSku = selectedVariant ? selectedVariant.sku : product.sku;
+
+  const discount = calculateDiscount(activePrice, activeComparePrice || 0);
+  const wasPrice = activeComparePrice || activePrice;
+  const savings = wasPrice - activePrice;
 
   const stockQty = product.inventory?.quantity || 0;
 
+  const handleAddToCart = () => {
+    addItem({
+      id: activeSku,
+      productId: product.id,
+      variantId: selectedVariant?.id,
+      weight: activeWeight || undefined,
+      name: product.name,
+      price: activePrice,
+      image: product.mainImage,
+      quantity,
+      slug: product.slug,
+    });
+    toast.success(`Added ${quantity} ${product.name}${activeWeight ? ` (${activeWeight}g)` : ""} to your cart!`);
+  };
+
+  const handleToggleWishlist = () => {
+    toggleWishlist({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.mainImage,
+      slug: product.slug,
+      category: product.category?.name,
+    });
+  };
+
   return (
     <div className="product-actions w-100">
+      {/* Pricing - Herb Approach Style */}
+      <div className="mb-4">
+        <table className="pricing-table">
+          <tbody>
+            {activeComparePrice && activeComparePrice > activePrice ? (
+              <>
+                <tr>
+                  <td className="pe-4 py-1 text-muted small fw-bold">Was:</td>
+                  <td className="py-1 text-decoration-line-through text-muted">{formatPrice(activeComparePrice)}</td>
+                </tr>
+                <tr>
+                  <td className="pe-4 py-1 text-muted small fw-bold">Promo Price:</td>
+                  <td className="py-1 fw-bold h5 m-0">{formatPrice(activePrice)}</td>
+                </tr>
+                <tr>
+                  <td className="pe-4 py-1 text-muted small fw-bold">You save:</td>
+                  <td className="py-1 text-success fw-bold">
+                    {formatPrice(savings)} ({discount}% OFF)
+                  </td>
+                </tr>
+              </>
+            ) : (
+              <tr>
+                <td className="pe-4 py-1 text-muted small fw-bold">Price:</td>
+                <td className="py-1 fw-bold h4 m-0">{formatPrice(activePrice)}</td>
+              </tr>
+            )}
+            {activeWeight ? (
+              <tr>
+                <td className="pe-4 py-1 text-muted small fw-bold">Per Gram:</td>
+                <td className="py-1 text-muted small">{formatPrice(activePrice / activeWeight)}/g</td>
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Weight Selector */}
+      {hasVariants && (
+        <div className="mb-4">
+          <label className="form-label small fw-bold text-uppercase mb-2">Select Weight</label>
+          <div className="d-flex flex-wrap gap-2">
+            {variants.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setSelectedVariantId(v.id)}
+                className={cn(
+                  "btn btn-sm rounded-pill px-3 py-2 fw-bold",
+                  selectedVariantId === v.id ? "btn-plant" : "btn-outline-secondary"
+                )}
+              >
+                {v.weight}g
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Earn Points */}
       <div className="mb-3">
         <span className="small text-muted">
-          Earn up to <strong className="text-primary">{Math.floor(product.price)} Points</strong>.
+          Earn up to <strong className="text-primary">{Math.floor(activePrice * quantity)} Points</strong>.
         </span>
       </div>
 
@@ -71,12 +160,18 @@ export default function ProductActions({ product }: { product: any }) {
       >
         <span>ADD TO CART</span>
         <span className="opacity-50">|</span>
-        <span>{formatPrice(product.price * quantity)}</span>
+        <span>{formatPrice(activePrice * quantity)}</span>
       </button>
 
       {/* Wishlist */}
-      <button className="btn btn-outline-secondary w-100 py-2 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 small">
-        <FaHeart size={14} /> ADD TO WISHLIST
+      <button
+        onClick={handleToggleWishlist}
+        className={cn(
+          "btn w-100 py-2 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 small",
+          isWishlisted ? "btn-danger" : "btn-outline-secondary"
+        )}
+      >
+        <FaHeart size={14} /> {isWishlisted ? "IN WISHLIST" : "ADD TO WISHLIST"}
       </button>
     </div>
   );

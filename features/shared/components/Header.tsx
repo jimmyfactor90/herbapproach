@@ -1,16 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession, signOut } from "@/lib/auth-client";
-import { FaSearch, FaUser, FaShoppingCart, FaFacebook, FaInstagram, FaTwitter, FaChevronDown, FaEnvelope, FaShieldAlt, FaStar } from "react-icons/fa";
+import { useSession } from "@/lib/auth-client";
+import { FaSearch, FaUser, FaShoppingCart, FaFacebook, FaInstagram, FaTwitter, FaChevronDown, FaEnvelope, FaStar } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/features/cart/store/cart.store";
 
-export default function Header() {
-  const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = useState(false);
+interface CategoryNode {
+  id: string;
+  name: string;
+  slug: string;
+  children: { id: string; name: string; slug: string }[];
+}
+
+interface HeaderProps {
+  categories: CategoryNode[];
+}
+
+export default function Header({ categories }: HeaderProps) {
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
@@ -18,247 +26,228 @@ export default function Header() {
 
   useEffect(() => {
     setMounted(true);
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Matches herbapproach.com's nav order (Flowers, Edibles, Vapes, Pre-Rolls, Extracts, CBD, Accessories)
+  const CATEGORY_ORDER = ["flowers", "edibles", "vapes", "pre-rolls", "concentrates", "cbd", "accessories"];
+  const orderedCategories = [...categories].sort(
+    (a, b) => CATEGORY_ORDER.indexOf(a.slug) - CATEGORY_ORDER.indexOf(b.slug)
+  );
+
+  // Rich mega-menu content matching herbapproach.com, keyed by category slug.
+  // Categories not listed here fall back to a plain dropdown built from their DB subcategories.
+  const MEGA_MENUS: Record<string, {
+    categories: string[];
+    sections: { title: string; links: { name: string; href: string; icon?: React.ReactNode }[] }[];
+    promo: { title: string; subtitle: string; image: string; button: string };
+  }> = {
+    flowers: {
+      categories: ["Dried Flower", "Pre-Rolls", "Moon Rocks"],
+      sections: [
+        {
+          title: "Plant Type",
+          links: [
+            { name: "INDICA", href: "/shop?strainType=INDICA" },
+            { name: "SATIVA", href: "/shop?strainType=SATIVA" },
+            { name: "HYBRID", href: "/shop?strainType=HYBRID" },
+          ],
+        },
+        {
+          title: "Value Menu",
+          links: [
+            { name: "CHEAP OUNCES", href: "/shop?filter=sale" },
+            { name: "BUNDLE PACKS", href: "/shop?category=bundles" },
+            { name: "CLEARANCE", href: "/shop?filter=clearance" },
+          ],
+        },
+        {
+          title: "Collections",
+          links: [
+            { name: "CRAFT CANNABIS", href: "#", icon: <FaStar size={10} className="me-1" /> },
+            { name: "LIVING SOIL ORGANIC", href: "#", icon: <FaStar size={10} className="me-1" /> },
+          ],
+        },
+      ],
+      promo: {
+        title: "2 OUNCES FOR $199.99",
+        subtitle: "Over 10+ Strains to Choose from",
+        image: "https://images.unsplash.com/photo-1628114241021-995f36e86684?q=80&w=300&auto=format&fit=crop",
+        button: "SHOP NOW",
+      },
+    },
+    edibles: {
+      categories: ["Gummies", "Hard Candy", "Chocolates", "Baked Goods", "Capsules", "Phoenix Tears", "Beverages", "Tinctures", "Pantry", "Munchies/Snacks"],
+      sections: [
+        {
+          title: "Shop by Potency",
+          links: [
+            { name: "ALL EDIBLES", href: "/shop?category=edibles" },
+            { name: "HIGH DOSE THC", href: "/shop?category=edibles&potency=HIGH_THC" },
+            { name: "LOW DOSE THC", href: "/shop?category=edibles&potency=LOW_THC" },
+            { name: "BALANCED 1:1", href: "/shop?category=edibles&potency=BALANCED" },
+            { name: "CBD EDIBLES", href: "/shop?category=cbd-edibles" },
+          ],
+        },
+        {
+          title: "Shop by Tinctures",
+          links: [
+            { name: "THC TINCTURES", href: "/shop?category=edibles-tinctures" },
+            { name: "CBD TINCTURES", href: "/shop?category=cbd-tinctures" },
+            { name: "THC : CBD TINCTURES", href: "/shop?category=edibles-tinctures&potency=BALANCED" },
+          ],
+        },
+        {
+          title: "Shop by Baked Goods",
+          links: [
+            { name: "COOKIES", href: "/shop?category=edibles-baked-goods" },
+            { name: "BROWNIES & SQUARES", href: "/shop?category=edibles-baked-goods" },
+          ],
+        },
+      ],
+      promo: {
+        title: "Sugar Jack's 200mg THC Gummies",
+        subtitle: "Best selling edibles and for good reason!",
+        image: "https://images.unsplash.com/photo-1582050041567-9cda33e4b158?q=80&w=300&auto=format&fit=crop",
+        button: "SHOP NOW",
+      },
+    },
+    vapes: {
+      categories: ["Vape Cartridges", "Starter Kits", "Disposable Pens", "510 Thread Batteries"],
+      sections: [
+        {
+          title: "Shop by Potency",
+          links: [
+            { name: "THC", href: "/shop?category=vapes&potency=HIGH_THC" },
+            { name: "CBD", href: "/shop?category=vapes&potency=CBD" },
+          ],
+        },
+        {
+          title: "Value Menu",
+          links: [
+            { name: "BUNDLE PACK", href: "/shop?category=bundles" },
+          ],
+        },
+        {
+          title: "Top Brands",
+          links: [
+            { name: "HOOTI EXTRACTS", href: "#" },
+            { name: "PYRO EXTRACTS", href: "#" },
+            { name: "TOP SHELF EXTRACTS", href: "#" },
+          ],
+        },
+      ],
+      promo: {
+        title: "Baked Vapes 2g Variations",
+        subtitle: "Baked Vapes now come in 2g variations for double the effects!",
+        image: "https://images.unsplash.com/photo-1594465919760-441fe5908ab0?q=80&w=300&auto=format&fit=crop",
+        button: "SHOP NOW",
+      },
+    },
+    concentrates: {
+      categories: ["Live Resin", "Shatter", "Rosin", "Crumble", "Budder", "Wax", "Terp Sauce", "THC Diamonds", "Hash", "Distillate", "Oils"],
+      sections: [
+        {
+          title: "Concentrates",
+          links: [
+            { name: "ALL CONCENTRATES", href: "/shop?category=concentrates" },
+            { name: "SOLVENTLESS CONCENTRATES", href: "/shop?category=concentrates-rosin" },
+            { name: "DAB RIGS & ACCESSORIES", href: "/shop?category=accessories-dab-rigs" },
+          ],
+        },
+        {
+          title: "Value Menu",
+          links: [
+            { name: "CONCENTRATES BUNDLE PACKS", href: "/shop?category=bundles" },
+          ],
+        },
+        {
+          title: "Ingestible Extracts",
+          links: [
+            { name: "BOTTLED OILS", href: "#" },
+            { name: "OIL SPRAYS", href: "#" },
+            { name: "CAPSULES", href: "#" },
+          ],
+        },
+      ],
+      promo: {
+        title: "Diamond Infused Blunts (High Rolla)",
+        subtitle: "AAAA Flowers Infused With Frozen Kief and THC-A Diamonds",
+        image: "https://images.unsplash.com/photo-1628114241021-995f36e86684?q=80&w=300&auto=format&fit=crop",
+        button: "VIEW PRODUCT",
+      },
+    },
+    cbd: {
+      categories: ["CBD Edibles", "CBD Tinctures", "Topicals", "CBD Vapes"],
+      sections: [
+        {
+          title: "Shop by CBD Product Type",
+          links: [
+            { name: "CBD CAPSULES", href: "#" },
+            { name: "CBD GUMMIES", href: "#" },
+            { name: "CBD VAPES & CONCENTRATES", href: "/shop?category=cbd-vapes" },
+            { name: "CBD PETS", href: "#" },
+          ],
+        },
+        {
+          title: "Value Menu",
+          links: [
+            { name: "BUNDLE PACKS", href: "/shop?category=bundles" },
+          ],
+        },
+        {
+          title: "Shop by Topical Type",
+          links: [
+            { name: "CREAMS AND LOTIONS", href: "/shop?category=cbd-topicals" },
+            { name: "BATH AND SHOWER", href: "#" },
+          ],
+        },
+        {
+          title: "Brands",
+          links: [
+            { name: "CBD BLASTS", href: "#" },
+            { name: "SUGAR JACK'S", href: "#" },
+          ],
+        },
+      ],
+      promo: {
+        title: "Apex Edibles 30mg CBD Gummies",
+        subtitle: "These 30mg CBD Gummies are tasty and correctly dosed for effective and easy relief!",
+        image: "https://images.unsplash.com/photo-1628114241021-995f36e86684?q=80&w=300&auto=format&fit=crop",
+        button: "SHOP NOW",
+      },
+    },
+  };
+
   const navLinks = [
-    { name: "VALUE MENU", href: "/shop?filter=sale", subLinks: [] },
-    { 
-      name: "FLASH DEALS", 
-      href: "/shop?filter=flash", 
+    { name: "VALUE MENU", href: "/shop", subLinks: [] as { name: string; href: string }[], isMega: false, megaContent: undefined },
+    {
+      name: "FLASH DEALS",
+      href: "/shop?filter=flash",
       subLinks: [
         { name: "Flash Deals", href: "/shop?filter=flash" },
-        { name: "Ounce Deals", href: "/shop?category=flowers&weight=ounce", hasDivider: true },
-        { name: "New Arrivals", href: "/shop?filter=new", hasDivider: true },
-        { name: "Bundle Packs", href: "/shop?category=bundles", hasDivider: true },
-        { name: "Clearance", href: "/shop?filter=clearance", hasDivider: true },
-      ] 
+        { name: "Ounce Deals", href: "/shop?category=flowers&weight=ounce" },
+        { name: "New Arrivals", href: "/shop?filter=new" },
+        { name: "Bundle Packs", href: "/shop?category=bundles" },
+        { name: "Clearance", href: "/shop?filter=clearance" },
+      ],
+      isMega: false,
+      megaContent: undefined,
     },
-    { 
-      name: "FLOWERS", 
-      href: "/shop?category=flowers", 
-      isMega: true,
-      megaContent: {
-        categories: ["Dried Flower", "Pre-Rolls", "Moon Rocks"],
-        sections: [
-          {
-            title: "Plant Type",
-            links: [
-              { name: "INDICA", href: "/shop?type=indica" },
-              { name: "SATIVA", href: "/shop?type=sativa" },
-              { name: "HYBRID", href: "/shop?type=hybrid" },
-            ]
-          },
-          {
-            title: "Value Menu",
-            links: [
-              { name: "CHEAP OUNCES", href: "/shop?filter=sale" },
-              { name: "BUNDLE PACKS", href: "/shop?category=bundles" },
-              { name: "CLEARANCE", href: "/shop?filter=clearance" },
-            ]
-          },
-          {
-            title: "Collections",
-            links: [
-              { name: "CRAFT CANNABIS", href: "#", icon: <FaStar size={10} className="me-1" /> },
-              { name: "LIVING SOIL ORGANIC", href: "#", icon: <FaStar size={10} className="me-1" /> },
-            ]
-          }
-        ],
-        promo: {
-          title: "2 OUNCES FOR $199.99",
-          subtitle: "Over 10+ Strains to Choose from",
-          image: "https://images.unsplash.com/photo-1628114241021-995f36e86684?q=80&w=300&auto=format&fit=crop",
-          button: "SHOP NOW"
-        }
-      }
-    },
-    { 
-      name: "EDIBLES", 
-      href: "/shop?category=edibles", 
-      isMega: true,
-      megaContent: {
-        categories: ["Gummies", "Hard Candy", "Chocolates", "Baked Goods", "Capsules", "Phoenix Tears", "Beverages", "Tinctures", "Pantry", "Munchies/Snacks"],
-        sections: [
-          {
-            title: "Shop by Potency",
-            links: [
-              { name: "ALL EDIBLES", href: "/shop?category=edibles" },
-              { name: "HIGH DOSE THC", href: "/shop?potency=high" },
-              { name: "LOW DOSE THC", href: "/shop?potency=low" },
-              { name: "BALANCED 1:1", href: "/shop?potency=balanced" },
-              { name: "CBD EDIBLES", href: "/shop?category=cbd-edibles" },
-            ]
-          },
-          {
-            title: "Shop by Tinctures",
-            links: [
-              { name: "THC TINCTURES", href: "/shop?category=tinctures&sub=thc" },
-              { name: "CBD TINCTURES", href: "/shop?category=tinctures&sub=cbd" },
-              { name: "THC : CBD TINCTURES", href: "/shop?category=tinctures&sub=hybrid" },
-            ]
-          },
-          {
-            title: "Shop by Baked Goods",
-            links: [
-              { name: "COOKIES", href: "/shop?category=baked-goods&sub=cookies" },
-              { name: "BROWNIES & SQUARES", href: "/shop?category=baked-goods&sub=brownies" },
-            ]
-          }
-        ],
-        promo: {
-          title: "Sugar Jack's 200mg THC Gummies",
-          subtitle: "Best selling edibles and for good reason!",
-          image: "https://images.unsplash.com/photo-1582050041567-9cda33e4b158?q=80&w=300&auto=format&fit=crop",
-          button: "SHOP NOW"
-        }
-      }
-    },
-    { 
-      name: "VAPES", 
-      href: "/shop?category=vapes", 
-      isMega: true,
-      megaContent: {
-        categories: ["Vape Cartridges", "Starter Kits", "Disposable Pens", "510 Thread Batteries"],
-        sections: [
-          {
-            title: "Shop by Potency",
-            links: [
-              { name: "THC", href: "/shop?category=vapes&filter=thc" },
-              { name: "CBD", href: "/shop?category=vapes&filter=cbd" },
-            ]
-          },
-          {
-            title: "Value Menu",
-            links: [
-              { name: "BUNDLE PACK", href: "/shop?category=bundles" },
-            ]
-          },
-          {
-            title: "Top Brands",
-            links: [
-              { name: "HOOTI EXTRACTS", href: "/shop?brand=hooti" },
-              { name: "PYRO EXTRACTS", href: "/shop?brand=pyro" },
-              { name: "TOP SHELF EXTRACTS", href: "/shop?brand=top-shelf" },
-            ]
-          }
-        ],
-        promo: {
-          title: "Baked Vapes 2g Variations",
-          subtitle: "Baked Vapes now come in 2g variations for double the effects!",
-          image: "https://images.unsplash.com/photo-1594465919760-441fe5908ab0?q=80&w=300&auto=format&fit=crop",
-          button: "SHOP NOW"
-        }
-      }
-    },
-    { 
-      name: "PRE-ROLLS", 
-      href: "/shop?category=pre-rolls", 
-      subLinks: [
-        { name: "Infused Pre-Rolls", href: "/shop?category=pre-rolls&sub=infused" },
-        { name: "Dried Flower Pre-Rolls", href: "/shop?category=pre-rolls&sub=dried", hasDivider: true },
-      ]
-    },
-    { 
-      name: "EXTRACTS", 
-      href: "/shop?category=extracts", 
-      isMega: true,
-      megaContent: {
-        categories: ["Live Resin", "Shatter", "Rosin", "Crumble", "Budder", "Wax", "Terp Sauce", "THC Diamonds", "Hash", "Distillate", "Oils"],
-        sections: [
-          {
-            title: "Concentrates",
-            links: [
-              { name: "ALL CONCENTRATES", href: "/shop?category=extracts" },
-              { name: "SOLVENTLESS CONCENTRATES", href: "/shop?category=extracts&sub=solventless" },
-              { name: "DAB RIGS & ACCESSORIES", href: "/shop?category=accessories" },
-            ]
-          },
-          {
-            title: "Value Menu",
-            links: [
-              { name: "CONCENTRATES BUNDLE PACKS", href: "/shop?category=bundles" },
-            ]
-          },
-          {
-            title: "Ingestible Extracts",
-            links: [
-              { name: "BOTTLED OILS", href: "/shop?category=extracts&sub=oils" },
-              { name: "OIL SPRAYS", href: "/shop?category=extracts&sub=sprays" },
-              { name: "CAPSULES", href: "/shop?category=extracts&sub=capsules" },
-            ]
-          }
-        ],
-        promo: {
-          title: "Diamond Infused Blunts (High Rolla)",
-          subtitle: "AAAA Flowers Infused With Frozen Kief and THC-A Diamonds",
-          image: "https://images.unsplash.com/photo-1628114241021-995f36e86684?q=80&w=300&auto=format&fit=crop",
-          button: "VIEW PRODUCT"
-        }
-      }
-    },
-    { 
-      name: "CBD", 
-      href: "/shop?category=cbd", 
-      isMega: true,
-      megaContent: {
-        categories: ["CBD Edibles", "CBD Tinctures", "Topicals", "CBD Vapes"],
-        sections: [
-          {
-            title: "Shop by CBD Product Type",
-            links: [
-              { name: "CBD CAPSULES", href: "/shop?category=cbd&sub=capsules" },
-              { name: "CBD GUMMIES", href: "/shop?category=cbd&sub=gummies" },
-              { name: "CBD VAPES & CONCENTRATES", href: "/shop?category=cbd&sub=vapes" },
-              { name: "CBD PETS", href: "/shop?category=cbd&sub=pets" },
-            ]
-          },
-          {
-            title: "Value Menu",
-            links: [
-              { name: "BUNDLE PACKS", href: "/shop?category=bundles" },
-            ]
-          },
-          {
-            title: "Shop by Topical Type",
-            links: [
-              { name: "CREAMS AND LOTIONS", href: "/shop?category=cbd&sub=creams" },
-              { name: "BATH AND SHOWER", href: "/shop?category=cbd&sub=bath" },
-            ]
-          },
-          {
-            title: "Brands",
-            links: [
-              { name: "CBD BLASTS", href: "/shop?brand=cbd-blasts" },
-              { name: "SUGAR JACK'S", href: "/shop?brand=sugar-jacks" },
-            ]
-          }
-        ],
-        promo: {
-          title: "Apex Edibles 30mg CBD Gummies",
-          subtitle: "These 30mg CBD Gummies are tasty and correctly dosed for effective and easy relief!",
-          image: "https://images.unsplash.com/photo-1628114241021-995f36e86684?q=80&w=300&auto=format&fit=crop",
-          button: "SHOP NOW"
-        }
-      }
-    },
-    { 
-      name: "ACCESSORIES", 
-      href: "/shop?category=accessories", 
-      subLinks: [
-        { name: "Batteries", href: "/shop?category=accessories&sub=batteries" },
-        { name: "Candles & Incense", href: "/shop?category=accessories&sub=candles", hasDivider: true },
-        { name: "Dab Rigs", href: "/shop?category=accessories&sub=rigs", hasDivider: true },
-        { name: "Dab Accessories", href: "/shop?category=accessories&sub=dab-acc", hasDivider: true },
-        { name: "Grinders", href: "/shop?category=accessories&sub=grinders", hasDivider: true },
-        { name: "Rolling Papers", href: "/shop?category=accessories&sub=papers", hasDivider: true },
-        { name: "Rolling Trays", href: "/shop?category=accessories&sub=trays", hasDivider: true },
-      ]
-    },
+    ...orderedCategories.map((cat) => {
+      const mega = MEGA_MENUS[cat.slug];
+      return {
+        name: cat.name.toUpperCase(),
+        href: `/shop?category=${cat.slug}`,
+        subLinks: mega
+          ? []
+          : cat.children.map((child) => ({
+              name: child.name,
+              href: `/shop?category=${child.slug}`,
+            })),
+        isMega: !!mega,
+        megaContent: mega,
+      };
+    }),
   ];
 
   return (
@@ -345,9 +334,9 @@ export default function Header() {
           <div className="collapse navbar-collapse d-lg-flex justify-content-between" id="mainNavCollapse">
             <ul className="navbar-nav align-items-center column-gap-3 mx-lg-auto">
               {navLinks.map((link) => {
-                const hasSubmenu = (link.subLinks?.length ?? 0) > 0 || link.isMega;
+                const hasSubmenu = link.subLinks.length > 0 || link.isMega;
                 return (
-                <li key={link.name} className={cn("nav-item position-static", hasSubmenu && "dropdown-hover", openSubmenu === link.name && "mobile-submenu-open")}>
+                <li key={link.name} className={cn("nav-item", link.isMega ? "position-static" : "position-relative", hasSubmenu && "dropdown-hover", openSubmenu === link.name && "mobile-submenu-open")}>
                   <div className="d-flex align-items-center">
                     <Link
                       href={link.href}
@@ -369,15 +358,14 @@ export default function Header() {
                     {hasSubmenu && <FaChevronDown size={8} className="opacity-50 d-none d-lg-inline ms-1" />}
                   </div>
 
-                  {/* MEGA MENU for Flowers */}
-                  {link.isMega ? (
+                  {link.isMega && link.megaContent ? (
                     <div className="mega-menu-panel position-absolute w-100 bg-white shadow-lg border-top" style={{ left: 0 }}>
                         <div className="container py-5">
                             <div className="row">
                                 {/* Left Col - Featured Categories */}
                                 <div className="col-lg-3 border-end">
                                     <ul className="list-unstyled d-flex flex-column gap-3 text-end pe-5">
-                                        {link.megaContent?.categories.map((cat, i) => (
+                                        {link.megaContent.categories.map((cat, i) => (
                                             <li key={i}><Link href="/shop" className="text-dark text-decoration-none h6 fw-600 hover-text-primary transition-all">{cat}</Link></li>
                                         ))}
                                     </ul>
@@ -386,7 +374,7 @@ export default function Header() {
                                 {/* Middle Cols - Sections */}
                                 <div className="col-lg-5">
                                     <div className="row g-4">
-                                        {link.megaContent?.sections.map((section, idx) => (
+                                        {link.megaContent.sections.map((section, idx) => (
                                             <div key={idx} className="col-6">
                                                 <h6 className="fw-900 small text-dark mb-3 tracking-widest">{section.title.toUpperCase()}</h6>
                                                 <ul className="list-unstyled d-flex flex-column gap-2">
@@ -407,28 +395,29 @@ export default function Header() {
                                 <div className="col-lg-4">
                                     <div className="promo-card bg-light rounded-lg overflow-hidden border p-4 text-center position-relative">
                                         <div className="promo-content">
-                                            <h4 className="fw-900 mb-0">{link.megaContent?.promo.title}</h4>
-                                            <p className="extra-small text-muted mb-3">{link.megaContent?.promo.subtitle}</p>
-                                            <img src={link.megaContent?.promo.image} className="img-fluid rounded mb-3" style={{ height: '140px', objectFit: 'cover' }} />
-                                            <Link href="/shop" className="btn btn-plant w-100 fw-bold">{link.megaContent?.promo.button}</Link>
+                                            <h4 className="fw-900 mb-0">{link.megaContent.promo.title}</h4>
+                                            <p className="extra-small text-muted mb-3">{link.megaContent.promo.subtitle}</p>
+                                            <img src={link.megaContent.promo.image} className="img-fluid rounded mb-3" style={{ height: '140px', objectFit: 'cover' }} alt={link.megaContent.promo.title} />
+                                            <Link href="/shop" className="btn btn-plant w-100 fw-bold">{link.megaContent.promo.button}</Link>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                  ) : (
-                    /* REGULAR DROPDOWN */
-                    (link.subLinks?.length ?? 0) > 0 && (
-                        <div className="custom-dropdown-panel position-absolute start-50 translate-middle-x bg-white shadow-sm border rounded py-2 mt-0">
-                            {link.subLinks?.map((sub: any, idx: number) => (
-                                <div key={idx}>
-                                    {sub.hasDivider && <div className="mx-0 border-top my-0 opacity-25" style={{ borderColor: '#eee' }}></div>}
-                                    <Link href={sub.href} className="dropdown-item px-4 py-2 small text-secondary hover-text-dark fw-500" style={{ fontSize: '13px', minWidth: '180px' }}>{sub.name}</Link>
-                                </div>
-                            ))}
-                        </div>
-                    )
+                  ) : hasSubmenu && (
+                    <div className="custom-dropdown-panel position-absolute start-50 translate-middle-x bg-white shadow-sm border rounded py-2 mt-0">
+                        {link.subLinks.map((sub, idx) => (
+                            <Link
+                              key={idx}
+                              href={sub.href}
+                              className={cn("dropdown-item px-4 py-2 small text-secondary hover-text-dark fw-500 d-block", idx > 0 && "border-top")}
+                              style={{ fontSize: '13px', minWidth: '180px', borderColor: '#eee' }}
+                            >
+                              {sub.name}
+                            </Link>
+                        ))}
+                    </div>
                   )}
                 </li>
                 );
@@ -447,7 +436,7 @@ export default function Header() {
     </header>
 
     <style jsx>{`
-        .dropdown-hover .custom-dropdown-panel, 
+        .dropdown-hover .custom-dropdown-panel,
         .dropdown-hover .mega-menu-panel {
             display: none;
             z-index: 1000;

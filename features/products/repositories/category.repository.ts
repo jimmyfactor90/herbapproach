@@ -9,6 +9,20 @@ export class CategoryRepository {
     });
   }
 
+  async findTree() {
+    return prisma.category.findMany({
+      where: { parentId: null },
+      orderBy: { name: "asc" },
+      include: {
+        _count: { select: { products: true } },
+        children: {
+          orderBy: { name: "asc" },
+          include: { _count: { select: { products: true } } },
+        },
+      },
+    });
+  }
+
   async findById(id: string) {
     return prisma.category.findUnique({
       where: { id },

@@ -98,9 +98,9 @@ model Product {
   featured       Boolean        @default(false)
   isActive       Boolean        @default(true)
 
-  // Plant-specific fields
-  careLevel      String         @default("MEDIUM")
-  sunlight       String         @default("INDIRECT")
+  // Cannabis-specific fields
+  strainType     String         @default("HYBRID")
+  potency        String         @default("BALANCED")
   waterFrequency String?
   petFriendly    Boolean        @default(false)
   indoorOutdoor  String         @default("INDOOR")
@@ -116,9 +116,27 @@ model Product {
   wishlistItems  Wishlist[]
   cartItems      Cart[]
   orderItems     OrderItem[]
+  variants       ProductVariant[]
 
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+}
+
+// Optional per-weight pricing (e.g. 3.5g / 7g / 14g / 28g at different prices).
+// A product with no variants just sells at its own price/weight.
+model ProductVariant {
+  id           String      @id @default(cuid())
+  productId    String
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  weight       Float
+  price        Float
+  comparePrice Float?
+  sku          String      @unique
+  orderItems   OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@unique([productId, weight])
 }
 
 model ProductImage {
@@ -164,11 +182,14 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
+  id        String          @id @default(cuid())
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId String
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product         @relation(fields: [productId], references: [id])
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  weight    Float?
   quantity  Int
   price     Float
   total     Float
